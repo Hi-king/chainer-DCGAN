@@ -14,29 +14,33 @@ import model
 parser = argparse.ArgumentParser()
 parser.add_argument("generator_model_file")
 parser.add_argument("vectorizer_model_file")
-parser.add_argument("target_img")
+parser.add_argument("target_img_0")
+parser.add_argument("target_img_1")
 parser.add_argument("--out_dir", default=".")
+parser.add_argument("--step", type=int, default=5)
 args = parser.parse_args()
 xp = numpy
 
+if not os.path.exists(args.out_dir):
+    os.makedirs(args.out_dir)
+
 generator = model.Generator()
 chainer.serializers.load_hdf5(args.generator_model_file, generator)
-
 extractor = model.FaceExtractor()
-
 vectorizer = model.Vectorizer()
 chainer.serializers.load_hdf5(args.vectorizer_model_file, vectorizer)
 
-face_img = extractor.extract(args.target_img)
-#face_img = cv2.cvtColor(cv2.imread(args.target_img), cv2.COLOR_BGR2RGB).astype(numpy.float32) / 256
-face_img_var = chainer.Variable(
-    numpy.array([face_img.transpose(2,0,1)*2 - 1.0]))
 
-pylab.imshow(face_img)
-pylab.show()
-
-reconstructed = vectorizer(face_img_var)
-regenerated = generator(reconstructed, test=True)
+## vectorize
+vectors = []
+for target_img in [args.target_img_0, args.target_img_1]:
+    face_img = extractor.extract(target_img)
+    face_img_var = chainer.Variable(
+        numpy.array([face_img.transpose(2,0,1)*2 - 1.0]))
+    #pylab.imshow(face_img)
+    #pylab.show()
+    vector = vectorizer(face_img_var)
+    vectors.append(vector)
 
 def clip_img(x):
     return numpy.float32(-1 if x<-1 else (1 if x>1 else x))
@@ -54,5 +58,11 @@ def save(x, filepath):
         cv2.cvtColor(img*256, cv2.COLOR_RGB2BGR)
     )
 
-save(face_img_var.data, os.path.join(args.out_dir, "face.png"))
-save(regenerated.data, os.path.join(args.out_dir, "reconstructed.png"))
+diff = vectors[1] - vectors[0]
+for s in xrange(args.step):
+    generated = generator(
+        vectors[0]*float(s)/(args.step-1)
+        + vectors[1]*float(args.step-s-1)/(args.step-1),
+        test=True
+    )
+    save(generated.data, os.path.join(args.out_dir, "morphing{}.png".format(s)))

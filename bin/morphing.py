@@ -18,6 +18,7 @@ parser.add_argument("target_img_0")
 parser.add_argument("target_img_1")
 parser.add_argument("--out_dir", default=".")
 parser.add_argument("--step", type=int, default=5)
+parser.add_argument("--margin", type=float, default=0.3, help="rate of facial region")
 args = parser.parse_args()
 xp = numpy
 
@@ -26,7 +27,7 @@ if not os.path.exists(args.out_dir):
 
 generator = model.Generator()
 chainer.serializers.load_hdf5(args.generator_model_file, generator)
-extractor = model.FaceExtractor()
+extractor = model.FaceExtractor(margin=args.margin)
 vectorizer = model.Vectorizer()
 chainer.serializers.load_hdf5(args.vectorizer_model_file, vectorizer)
 

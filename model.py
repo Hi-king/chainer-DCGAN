@@ -51,9 +51,10 @@ class Vectorizer(chainer.Chain):
         return l
 
 class FaceExtractor(object):
-    def __init__(self):
+    def __init__(self, margin=0.3):
         self.classifier = cv2.CascadeClassifier(
             os.path.join(os.path.dirname(__file__), "animeface", "lbpcascade_animeface.xml"))
+        self.margin = margin
 
     def extract(self, img_file):
         target_img = cv2.imread(img_file)
@@ -71,7 +72,7 @@ class FaceExtractor(object):
         margin = min(
             y, image_height - y - width,
             x, image_width -x - width,
-            width
+            width*self.margin
         )
         rgb_img = cv2.cvtColor(cv2.resize(
             target_img[y-margin:y+height+margin, x-margin:x+width+margin],
@@ -87,7 +88,6 @@ class FaceExtractor(object):
             cv2.COLOR_BGR2RGB
         ))
         pylab.show()
-
 
         float_img = rgb_img.astype(numpy.float32)
         # return cv2.resize(

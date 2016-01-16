@@ -1,5 +1,6 @@
 import os
 import sys
+import random
 import argparse
 import chainer
 import chainer.serializers
@@ -29,6 +30,17 @@ if args.gpu >= 0:
 else:
     xp = numpy
 
+def augment(original_img, max_margin=10):
+    margin = random.randint(0, max_margin)
+    original_width, original_height, _ = original_img.shape
+    left = random.randint(0, margin)
+    top = random.randint(0, margin)
+    cropped_img = original_img[
+        left:left+(original_width-2*margin),
+        top:top+(original_height-2*margin),
+    ]
+    return cv2.resize(cropped_img, (original_width, original_height))
+
 generator = model.Generator()
 chainer.serializers.load_hdf5(args.model_file, generator)
 
@@ -48,7 +60,13 @@ for i in xrange(args.iter):
     #z = target_z.W
     x = generator(z, test=True)
 
-    reconstructed = vectorizer(chainer.Variable(x.data))
+    # aumentation
+    if args.gpu >= 0:
+        augmented = xp.array([augment(x.data.get()[0].transpose(1, 2, 0)).transpose(2, 0, 1)])
+    else:
+        augmented = xp.array([augment(x.data[0].transpose(1, 2, 0)).transpose(2, 0, 1)])
+
+    reconstructed = vectorizer(chainer.Variable(augmented))
 
     loss = chainer.functions.mean_squared_error(
         reconstructed,

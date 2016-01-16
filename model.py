@@ -66,6 +66,8 @@ class FaceExtractor(object):
             minNeighbors = 5, 
             minSize = (24, 24))
         print(len(faces))
+        if len(faces) == 0:
+            raise(Exception("Could not find face from img"))
 
         x, y, width, height = faces[0]
         image_width, image_height, _ = target_img.shape
@@ -82,16 +84,12 @@ class FaceExtractor(object):
             interpolation=cv2.INTER_AREA
         ), cv2.COLOR_BGR2RGB)
 
-        import pylab
-        pylab.imshow(cv2.cvtColor(
-            target_img[y-margin:y+height+margin, x-margin:x+width+margin],
-            cv2.COLOR_BGR2RGB
-        ))
-        pylab.show()
+        # import pylab
+        # pylab.imshow(cv2.cvtColor(
+        #     target_img[y-margin:y+height+margin, x-margin:x+width+margin],
+        #     cv2.COLOR_BGR2RGB
+        # ))
+        # pylab.show()
 
         float_img = rgb_img.astype(numpy.float32)
-        # return cv2.resize(
-        #     cv2.cvtColor(target_img, cv2.COLOR_BGR2RGB),
-        #     (96,96)
-        # ).astype(numpy.float32) / 256
         return float_img / 256

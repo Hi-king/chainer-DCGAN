@@ -57,10 +57,9 @@ for i in xrange(args.iter):
     z_data = (xp.random.uniform(-1, 1, (1, 100)).astype(xp.float32))
     optimizer.zero_grads()
     z = chainer.Variable(z_data)
-    #z = target_z.W
     x = generator(z, test=True)
 
-    # aumentation
+    # augmentation
     if args.gpu >= 0:
         augmented = xp.array([augment(x.data.get()[0].transpose(1, 2, 0)).transpose(2, 0, 1)])
     else:

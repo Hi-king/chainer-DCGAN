@@ -4,6 +4,8 @@ from PIL import Image
 import os
 from StringIO import StringIO
 import math
+import matplotlib
+matplotlib.use('Agg')
 import pylab
 
 
@@ -21,22 +23,31 @@ import chainer.links as L
 
 
 import numpy
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("image_dir")
+parser.add_argument("out_image_dir")
+parser.add_argument("out_model_dir")
+parser.add_argument("--n_epoch", type=int, default=int(1e10))
+parser.add_argument("--n_train", type=int, default=200000)
+parser.add_argument("--dataset_limit", type=int, default=int(1e25))
+args = parser.parse_args()
 
 
-image_dir = './images'
-out_image_dir = './out_images'
-out_model_dir = './out_models'
+image_dir = args.image_dir
+out_image_dir = args.out_image_dir
+out_model_dir = args.out_model_dir
 
 
 nz = 100          # # of dim for Z
 batchsize=100
-n_epoch=10000
-n_train=200000
+n_epoch=args.n_epoch
+n_train=args.n_train
 image_save_interval = 50000
 
 # read all images
 
-fs = os.listdir(image_dir)
+fs = os.listdir(image_dir)[:args.dataset_limit]
 print len(fs)
 dataset = []
 for fn in fs:
@@ -167,6 +178,7 @@ def train_dcgan_labeled(gen, dis, epoch0=0):
         sum_l_gen = np.float32(0)
         
         for i in xrange(0, n_train, batchsize):
+            print("{}/{}".format(i, n_train))
             # discriminator
             # 0: from dataset
             # 1: from noise

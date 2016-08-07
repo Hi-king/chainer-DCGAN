@@ -1,8 +1,11 @@
 .idea
 *.jpg
+*.png
 *.h5
 *.pyc
 animeface
 output
 img
 result
+.DS_Store
+models

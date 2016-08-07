@@ -28,7 +28,7 @@ vectorizer = model.Vectorizer()
 chainer.serializers.load_hdf5(args.vectorizer_model_file, vectorizer)
 
 face_img = extractor.extract(args.target_img)
-#face_img = cv2.cvtColor(cv2.imread(args.target_img), cv2.COLOR_BGR2RGB).astype(numpy.float32) / 256
+# face_img = cv2.resize(cv2.cvtColor(cv2.imread(args.target_img), cv2.COLOR_BGR2RGB).astype(numpy.float32) / 256, (96, 96))
 face_img_var = chainer.Variable(
     numpy.array([face_img.transpose(2,0,1)*2 - 1.0]))
 

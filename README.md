@@ -26,6 +26,7 @@ python bin/train_vectorizer.py generator_model.h5 100000000 --gpu=-1 --out_dir=o
 
 ```
 python bin/morphing.py original/generator_model.h5 vectorizer_model_9990000.h5 img/sakurako.jpg img/himawari.jpg --step=20 --out_dir=result/sakurako_himawari
+montage result/sakurako_himawari/morphing*.png -tile x1 result/sakurako_himawari.png
 ```
 
 ## Average

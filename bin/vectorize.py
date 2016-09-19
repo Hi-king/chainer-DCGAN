@@ -1,12 +1,10 @@
-import os
 import argparse
-import chainer
-import chainer.serializers
+import os
+import sys
 import chainer.optimizers
+import cv2
 import numpy
 import pylab
-import cv2
-import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import model

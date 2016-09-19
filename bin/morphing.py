@@ -31,39 +31,46 @@ extractor = model.FaceExtractor(margin=args.margin)
 vectorizer = model.Vectorizer()
 chainer.serializers.load_hdf5(args.vectorizer_model_file, vectorizer)
 
-
 ## vectorize
 vectors = []
 for target_img in [args.target_img_0, args.target_img_1]:
     face_img = extractor.extract(target_img)
+    # face_img = cv2.resize(cv2.cvtColor(cv2.imread(target_img), cv2.COLOR_BGR2RGB).astype(numpy.float32) / 256, (96, 96))
     face_img_var = chainer.Variable(
-        numpy.array([face_img.transpose(2,0,1)*2 - 1.0]))
-    #pylab.imshow(face_img)
-    #pylab.show()
+        numpy.array([face_img.transpose(2, 0, 1) * 2 - 1.0]))
+    # pylab.imshow(face_img)
+    # pylab.show()
     vector = vectorizer(face_img_var)
     vectors.append(vector)
 
+
 def clip_img(x):
-    return numpy.float32(-1 if x<-1 else (1 if x>1 else x))
+    return numpy.float32(-1 if x < -1 else (1 if x > 1 else x))
+
 
 def save(x, filepath):
-    img = ((numpy.vectorize(clip_img)(x[0,:,:,:])+1)/2).transpose(1,2,0)
-    pylab.imshow(img)
-    pylab.axis('off')
-    # pylab.savefig(filepath)
-    pylab.show()
+    img = ((numpy.vectorize(clip_img)(x[0, :, :, :]) + 1) / 2).transpose(1, 2, 0)
+    # pylab.imshow(img)
+    # pylab.axis('off')
+    # # pylab.savefig(filepath)
+    # pylab.show()
 
     print(img.shape)
     cv2.imwrite(
         filepath,
-        cv2.cvtColor(img*256, cv2.COLOR_RGB2BGR)
+        cv2.cvtColor(img * 256, cv2.COLOR_RGB2BGR)
     )
 
+
 diff = vectors[1] - vectors[0]
-for s in xrange(args.step):
+for ss in xrange(args.step*2):
+    if ss >= args.step:
+        s = args.step * 2 - ss
+    else:
+        s = ss
     generated = generator(
-        vectors[0]*float(s)/(args.step-1)
-        + vectors[1]*float(args.step-s-1)/(args.step-1),
+        vectors[0] * float(s) / (args.step - 1)
+        + vectors[1] * float(args.step - s - 1) / (args.step - 1),
         test=True
     )
-    save(generated.data, os.path.join(args.out_dir, "morphing{}.png".format(s)))
+    save(generated.data, os.path.join(args.out_dir, "morphing{:04d}.png".format(ss)))

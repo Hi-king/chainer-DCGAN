@@ -3,7 +3,6 @@
 *.png
 *.h5
 *.pyc
-animeface
 output
 img
 result

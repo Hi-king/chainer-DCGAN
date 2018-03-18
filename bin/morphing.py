@@ -63,7 +63,7 @@ def save(x, filepath):
 
 
 diff = vectors[1] - vectors[0]
-for ss in xrange(args.step*2):
+for ss in range(args.step*2):
     if ss >= args.step:
         s = args.step * 2 - ss
     else:

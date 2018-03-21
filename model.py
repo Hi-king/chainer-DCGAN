@@ -57,20 +57,22 @@ class Vectorizer(chainer.Chain):
 
 
 class FaceExtractor(object):
-    def __init__(self, margin=0.3):
+    def __init__(self, margin=0.3, resize=(96, 96)):
         self.classifier = cv2.CascadeClassifier(
             os.path.join(os.path.dirname(__file__), "animeface", "lbpcascade_animeface.xml"))
         self.margin = margin
+        self.resize = resize
 
     def extract(self, img_file):
         target_img = cv2.imread(img_file)
         gray_img = cv2.cvtColor(target_img, cv2.COLOR_BGR2GRAY)
         gray_img_preprocessed = cv2.equalizeHist(gray_img)
+        cv2.imwrite("face.png", gray_img_preprocessed)
         faces = self.classifier.detectMultiScale(
             gray_img_preprocessed,
             scaleFactor=1.1,
             minNeighbors=5,
-            minSize=(24, 24))
+            minSize=(12, 12))
         print(len(faces))
         if len(faces) == 0:
             raise (Exception("Could not find face from img"))
@@ -80,22 +82,15 @@ class FaceExtractor(object):
         margin = min(
             y, image_height - y - width,
             x, image_width - x - width,
-               width * self.margin
+               int(width * self.margin)
         )
         rgb_img = cv2.cvtColor(cv2.resize(
             target_img[y - margin:y + height + margin, x - margin:x + width + margin],
-            (96, 96),
+            self.resize,
             # interpolation=cv2.INTER_LANCZOS4
             # interpolation=cv2.INTER_NEAREST,
             interpolation=cv2.INTER_AREA
         ), cv2.COLOR_BGR2RGB)
-
-        # import pylab
-        # pylab.imshow(cv2.cvtColor(
-        #     target_img[y-margin:y+height+margin, x-margin:x+width+margin],
-        #     cv2.COLOR_BGR2RGB
-        # ))
-        # pylab.show()
 
         float_img = rgb_img.astype(numpy.float32)
         return float_img / 256
